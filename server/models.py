@@ -12,3 +12,9 @@ class Message(db.Model, SerializerMixin):
     __tablename__ = 'messages'
 
     id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.String(200))  # Body field for storing message content
+    username = db.Column(db.String(100))  # Add username field to store who sent the message
+
+    # Optional __repr__ method to display the message contents
+    def __repr__(self):
+        return f'<Message {self.body}>'
