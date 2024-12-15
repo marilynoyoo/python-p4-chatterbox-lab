@@ -4,16 +4,19 @@ from app import app
 from models import db, Message
 
 class TestApp:
-    '''Flask application in app.py'''
-
+   def setup_method(self):
+    '''Set up the database for testing'''
     with app.app_context():
+        db.drop_all()
+        db.create_all()
         m = Message.query.filter(
-            Message.body == "Hello 👋"
+            Message.body == "Hello 👋", username="Ian"
             ).filter(Message.username == "Liza")
-
+        message = Message(body="Test message", username="Tester")
         for message in m:
             db.session.delete(message)
 
+        db.session.add(message)
         db.session.commit()
 
     def test_has_correct_columns(self):
@@ -89,9 +92,14 @@ class TestApp:
         '''updates the body of a message in the database.'''
         with app.app_context():
 
-            m = Message.query.first()
+            m = Message.query.first() # Should not be None now
+            assert m is not None  # Ensure there is a message
             id = m.id
-            body = m.body
+            m.body = "Updated body"
+            db.session.commit()
+
+            updated_message = Message.query.get(id)
+            assert updated_message.body == "Updated body"
 
             app.test_client().patch(
                 f'/messages/{id}',
